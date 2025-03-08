@@ -1,0 +1,117 @@
+
+# services:
+#   mysql:
+#     image: mysql:8.0
+#     container_name: mysql-healthcare
+#     environment:
+#       MYSQL_ROOT_PASSWORD: rootpassword
+#       MYSQL_DATABASE: healthcare
+#     networks:
+#       - healthcare-net
+#     ports:
+#       - "3306:3306"
+#     volumes:
+#       - mysql-data:/var/lib/mysql
+#       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+#   mongo:
+#     image: mongo:6.0
+#     container_name: mongo-healthcare
+#     environment:
+#       MONGO_INITDB_DATABASE: healthcare
+#     networks:
+#       - healthcare-net
+#     ports:
+#       - "27017:27017"
+#     volumes:
+#       - mongo-data:/data/db
+
+#   backend:
+#     build: .
+#     container_name: backend
+#     networks:
+#       - healthcare-net
+#     ports:
+#       - "5000:5000"
+#     environment:
+#       - NODE_ENV=development
+#       - JWT_SECRET=your_jwt_secret_key
+#       - MYSQL_HOST=mysql
+#       - MYSQL_USER=root
+#       - MYSQL_PASSWORD=rootpassword
+#       - MONGO_URI=mongodb://mongo:27017/healthcare
+#     depends_on:
+#       - mysql
+#       - mongo
+
+# volumes:
+#   mysql-data:
+#   mongo-data:
+
+# networks:
+#   healthcare-net:
+#     driver: bridge
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-healthcare
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: healthcare
+    networks:
+      - healthcare-net
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  mongo:
+    image: mongo:6.0
+    container_name: mongo-healthcare
+    environment:
+      MONGO_INITDB_DATABASE: healthcare
+    networks:
+      - healthcare-net
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: backend
+    networks:
+      - healthcare-net
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - JWT_SECRET=your_jwt_secret_key
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=rootpassword
+      - MONGO_URI=mongodb://mongo:27017/healthcare
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+
+volumes:
+  mysql-data:
+  mongo-data:
+
+networks:
+  healthcare-net:
+    driver: bridge

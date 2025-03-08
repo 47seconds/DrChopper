@@ -1,24 +1,23 @@
 import mysql from 'mysql2/promise';
 
-const createPool = () => {
-  return mysql.createPool({
-    host: process.env.MYSQL_HOST,
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
-    database: 'healthcare',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-  });
-};
+// Create single pool instance
+const pool = mysql.createPool({
+  host: process.env.MYSQL_HOST,
+  user: process.env.MYSQL_USER,
+  password: process.env.MYSQL_PASSWORD,
+  database: 'healthcare',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
 
-// Get patient by ID
 export const getPatientById = async (id) => {
-  const pool = createPool();
   const [rows] = await pool.query('SELECT * FROM patients WHERE id = ?', [id]);
-  await pool.end();
   return rows[0];
 };
+
+// Keep other functions the same but remove pool creation/ending
+// Remove createPool() and pool.end() from all functions
 
 // Search patients by name
 export const searchPatientsByName = async (name) => {
