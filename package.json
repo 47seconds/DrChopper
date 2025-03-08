@@ -4,12 +4,12 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-  "start": "node src/index.js",
-  "dev": "nodemon src/index.js",
-  "docker:build": "docker-compose build",
-  "docker:up": "docker-compose up",
-  "docker:down": "docker-compose down"
-},
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up",
+    "docker:down": "docker-compose down"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
